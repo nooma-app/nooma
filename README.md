@@ -1,6 +1,6 @@
-# Nooma Grid
+# Nooma
 
-Keyboard-first fixed cell grid for math-style entry (graph-paper workflow): one character per cell with local persistence (IndexedDB via Dexie). Built with Next.js, Tailwind, and shadcn/ui.
+Infinite canvas for math work — embeddable arithmetic cards on Excalidraw, with local persistence (IndexedDB via Dexie). Built with Next.js, Tailwind, and shadcn/ui.
 
 ## Development
 
