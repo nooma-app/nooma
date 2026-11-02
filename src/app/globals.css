@@ -50,6 +50,8 @@
 }
 
 :root {
+  --nooma-brand-bg: oklch(0.52 0.19 264);
+  --nooma-toolbar-fab-bg: var(--nooma-brand-bg);
   --nooma-grid-stroke: oklch(0.52 0.19 264);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -129,4 +131,293 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Below interactive canvas (2) so selection handles stay visible; selected embed bumped via JS. */
+.excalidraw .excalidraw__embeddable-container {
+  z-index: var(--zIndex-canvas);
+}
+
+/* Hide Excalidraw hyperlink editor/preview UI for custom embeddables. */
+.excalidraw .excalidraw-hyperlinkContainer {
+  display: none !important;
+}
+
+/* Nooma blocks provide their own affordances; suppress Excalidraw's generic embed prompt. */
+.excalidraw .excalidraw__embeddable-hint {
+  display: none !important;
+}
+
+/* Shared base styling for embedded Nooma math cards. */
+.excalidraw .nooma-math-card {
+  border: 2px solid #554ecd;
+  border-radius: 8px !important;
+  background: #ffffff;
+  box-shadow: 0 2px 2px oklch(0.38 0.03 272 / 0.20);
+  pointer-events: auto;
+}
+
+.excalidraw .nooma-math-card button {
+  pointer-events: auto;
+}
+
+.excalidraw .nooma-math-card.nooma-arithmetic-card,
+.excalidraw .nooma-math-card.nooma-arithmetic-card * {
+  pointer-events: none;
+}
+
+.excalidraw .nooma-math-card.nooma-arithmetic-card button {
+  pointer-events: auto;
+}
+
+.excalidraw .nooma-math-card.nooma-arithmetic-card button * {
+  pointer-events: none;
+}
+
+/*
+ * Answer row is right-aligned like addends; empty space on the left must still hit
+ * this row (pointer-events:auto) or clicks fall through to the canvas below.
+ */
+.excalidraw .nooma-math-card.nooma-arithmetic-card .nooma-arithmetic-answer-row {
+  pointer-events: auto;
+}
+
+@keyframes nooma-arithmetic-caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/*
+ * Embeddable DOM may not be a descendant of `.excalidraw`; scope only to the card
+ * so the caret always picks up size/color (see ArithmeticBoxEmbed).
+ */
+.nooma-math-card .nooma-arithmetic-caret {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 2px;
+  min-height: 10px;
+  height: 0.8em;
+  border-radius: 1px;
+  /* Same as `.excalidraw .nooma-math-card` border */
+  background-color: #554ecd;
+  animation: nooma-arithmetic-caret-blink 1.05s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nooma-math-card .nooma-arithmetic-caret {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Hide Excalidraw library UI (sidebar, header controls); Nooma uses custom embeds. */
+.excalidraw .layer-ui__library,
+.excalidraw .default-sidebar-trigger,
+.excalidraw .default-sidebar {
+  display: none !important;
+}
+
+/* Main menu: hide “Excalidraw links” (GitHub / X / Discord) and its separator rails. */
+.excalidraw
+  div:has(+ .dropdown-menu-group:has(a[href="https://github.com/excalidraw/excalidraw"])) {
+  display: none !important;
+}
+.excalidraw .dropdown-menu-group:has(a[href="https://github.com/excalidraw/excalidraw"]) {
+  display: none !important;
+}
+.excalidraw
+  .dropdown-menu-group:has(a[href="https://github.com/excalidraw/excalidraw"])
+  + div {
+  display: none !important;
+}
+
+/*
+ * Pin the shape tool strip above the footer (no Excalidraw API for this).
+ * Do not set position:relative on .App-menu_top — it shrinks to header height and
+ * traps bottom:… so the bar sits under the top chrome. Anchor to .FixedSideContainer.
+ * Footer uses z-index:100; stay above it. Default: 16px from viewport bottom.
+ */
+/*
+ * :root: toolbar/FAB variables must live here too — the FAB is portaled to
+ * document.body (above Excalidraw’s own portaled layer UI) and won’t inherit
+ * from .nooma-excalidraw-host.
+ */
+:root,
+.nooma-excalidraw-host,
+.excalidraw {
+  --nooma-toolbar-bottom-offset: 0px;
+  /* Space between arrow and line tools for the center FAB */
+  --nooma-toolbar-fab-gap: 100px;
+  --nooma-toolbar-fab-size: 94px;
+  /* Raise center of FAB to sit on the toolbar row (tune with toolbar offset). */
+  --nooma-toolbar-fab-vertical-adjust: 2.25rem;
+  /* Footer strip: tuck undo/redo left; give zoom space from the right edge */
+  --nooma-footer-padding-inline-start: 0.375rem;
+  --nooma-footer-padding-inline-end: 1.5rem;
+  --nooma-footer-zoom-inset-end: 0.75rem;
+}
+/*
+ * Shape tools: data-testid lives on the hidden radio <input>, not the <label>.
+ * Margin on [data-testid] did nothing — target label.Shape:has(...).
+ * Diamond: @excalidraw rebuilds UIOptions.tools to only { image }, so hide via CSS.
+ */
+.excalidraw .App-toolbar-container label.Shape:has(input[data-testid="toolbar-diamond"]) {
+  display: none !important;
+}
+.excalidraw .App-toolbar-container label.Shape:has(input[data-testid="toolbar-arrow"]) {
+  margin-inline-end: var(--nooma-toolbar-fab-gap) !important;
+}
+.excalidraw .shapes-section {
+  position: absolute;
+  left: 50%;
+  bottom: var(--nooma-toolbar-bottom-offset);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(100vw - 2rem, 60rem);
+  z-index: 110;
+}
+/* Toolbar hint (“move canvas…”). Delete this block to show it again. */
+.excalidraw .HintViewer {
+  display: none !important;
+}
+
+/* Extra tools (⋯) submenu: default is top:100% (below); dock toolbar at bottom → open above. */
+.excalidraw .App-toolbar__extra-tools-dropdown.dropdown-menu {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 0.375rem;
+}
+
+/*
+ * More tools (⋯): hide “Generate” row + all items after it (Mermaid, AI / TTD).
+ * Scoped to `.App-toolbar__extra-tools-dropdown` only — does not affect the canvas
+ * dot grid (`gridModeEnabled`) or the main hamburger / command-palette toggles.
+ * Heading is a bare div with inline font-weight:600 (see Excalidraw ShapesSwitcher).
+ */
+.excalidraw
+  .App-toolbar__extra-tools-dropdown
+  .dropdown-menu-container
+  > div[style*="font-weight: 600"],
+.excalidraw
+  .App-toolbar__extra-tools-dropdown
+  .dropdown-menu-container
+  > div[style*="font-weight:600"] {
+  display: none !important;
+}
+.excalidraw
+  .App-toolbar__extra-tools-dropdown
+  .dropdown-menu-container
+  > div[style*="font-weight: 600"]
+  ~ *,
+.excalidraw
+  .App-toolbar__extra-tools-dropdown
+  .dropdown-menu-container
+  > div[style*="font-weight:600"]
+  ~ * {
+  display: none !important;
+}
+
+/* Numeric shortcut hints on toolbar icons (bottom-right). */
+.excalidraw .App-toolbar-container .ToolIcon__keybinding {
+  display: none !important;
+}
+
+/*
+ * FAB and link shields are portaled to body so they sit above Excalidraw’s canvas
+ * (z-index ~1000+ layer UI). Shields 10040; FAB 10050; toasts 999999.
+ */
+.nooma-toolbar-fab-anchor {
+  position: fixed;
+  z-index: 10050;
+  left: 50%;
+  width: var(--nooma-toolbar-fab-size);
+  height: var(--nooma-toolbar-fab-size);
+  bottom: calc(
+    var(--nooma-toolbar-bottom-offset) + var(--nooma-toolbar-fab-vertical-adjust)
+  );
+  transform: translate(-50%, 50%);
+  pointer-events: auto;
+}
+
+/* Top-left wordmark beside Excalidraw’s hamburger (.main-menu-trigger). */
+.nooma-header-brand {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  padding-inline: 0.75rem !important;
+  border-radius: var(--nooma-header-brand-radius, 0.5rem) !important;
+  background: var(--nooma-brand-bg, oklch(0.52 0.19 264)) !important;
+  color: #ffffff !important;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1 !important;
+  box-shadow:
+    0 2px 10px oklch(0.55 0.2 280 / 0.20),
+    0 2px 4px oklch(0 0 0 / 0.8) !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+.nooma-toolbar-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  background: var(--nooma-toolbar-fab-bg, oklch(0.52 0.19 264));
+  box-shadow:
+    0 4px 20px oklch(0.55 0.2 280 / 0.35),
+    0 2px 8px oklch(0 0 0 / 0.12);
+}
+.nooma-toolbar-fab:hover {
+  filter: brightness(1.05);
+}
+.nooma-toolbar-fab:focus-visible {
+  outline: 2px solid oklch(0.55 0.2 264);
+  outline-offset: 3px;
+}
+
+/* Footer: hide help; pin zoom to bottom-end; undo/redo stay bottom-start (normal flow). */
+.excalidraw button.help-icon {
+  display: none !important;
+}
+.excalidraw .App-menu_bottom {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-inline-start: var(--nooma-footer-padding-inline-start) !important;
+  padding-inline-end: var(--nooma-footer-padding-inline-end) !important;
+}
+/* Footer tunnel for custom UI (Grid switch): same vertical centerline as undo/redo row. */
+.excalidraw .footer-center {
+  display: flex;
+  align-items: center;
+}
+.excalidraw .App-menu_bottom .zoom-actions {
+  position: absolute;
+  inset-inline-end: var(--nooma-footer-zoom-inset-end);
+  bottom: 0;
+  z-index: 102;
+}
+
+/* Footer: Nooma “Grid” row (shadcn Switch) in Excalidraw’s Footer tunnel. */
+.excalidraw .nooma-footer-grid-control {
+  margin-inline-start: 1rem;
+  transform: translateY(8px);
 }
