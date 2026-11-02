@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nooma Grid",
+  title: "Nooma",
   description:
     "Keyboard-first infinite canvas for math — optimized for students with dysgraphia.",
 };
